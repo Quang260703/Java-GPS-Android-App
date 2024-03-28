@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1085072087438",
+    "project_id": "msuexplorer",
+    "storage_bucket": "msuexplorer.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1085072087438:android:c6199ff7451e49916bacdf",
+        "android_client_info": {
+          "package_name": "msu.edu.msuexplorer"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDR-NyVGAdEe_eN2W4stxkoA8yDUhnJERU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
