@@ -1,7 +1,5 @@
 package msu.edu.msuexplorer;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
@@ -9,14 +7,15 @@ import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.Settings;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.davemorrissey.labs.subscaleview.ImageSource;
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView;
@@ -61,14 +60,23 @@ public class GameActivity extends AppCompatActivity implements UserLocation.Loca
 
     private AlertDialog calculatingLocationDialog;
 
+    private AlertDialog customRoundDialog;
+
     private int totalPoints = 0;
+
+    private int currentRoundPoints = 0;
+
+    private double currentRoundDistance = 0;
 
     private final static String IMAGEIDX = "Game.imageIdx";
     private final static String GAMEOVER = "Game.gameover";
     private final static String LOCATION1 = "Game.location1";
     private final static String LOCATION2 = "Game.location2";
-    private final static String LOCATION3 = "Game2.location3";
+    private final static String LOCATION3 = "Game.location3";
     private final static String TOTALSCORE = "Game.totalScore";
+    private final static String ROUNDSCORE = "Game.roundScore";
+    private final static String ROUNDDISTANCE = "Game.roundDistance";
+    private final static String ROUNDDIALOG = "Game.roundDialog";
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle bundle) {
@@ -79,12 +87,18 @@ public class GameActivity extends AppCompatActivity implements UserLocation.Loca
         bundle.putParcelable(LOCATION2, locations.get(1));
         bundle.putParcelable(LOCATION3, locations.get(2));
         bundle.putInt(TOTALSCORE, totalPoints);
+        bundle.putBoolean(ROUNDDIALOG, customRoundDialog != null && customRoundDialog.isShowing());
+        bundle.putInt(ROUNDSCORE, currentRoundPoints);
+        bundle.putDouble(ROUNDDISTANCE, currentRoundDistance);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
+
+        currentPointsTextView = findViewById(R.id.gamePointsText);
+        currentRoundTextView = findViewById(R.id.gameRoundsText);
 
         // The view model for the DB
         LocationViewModel db = new ViewModelProvider(this).get(LocationViewModel.class);
@@ -100,8 +114,6 @@ public class GameActivity extends AppCompatActivity implements UserLocation.Loca
         // grab needed views
         gameView = findViewById(R.id.gamelayout);
         gameOverView = findViewById(R.id.gameoverlayout);
-        currentPointsTextView = findViewById(R.id.gamePointsText);
-        currentRoundTextView = findViewById(R.id.gameRoundsText);
 
         if (savedInstanceState != null) {
             currentLocationIdx = savedInstanceState.getInt(IMAGEIDX);
@@ -109,9 +121,14 @@ public class GameActivity extends AppCompatActivity implements UserLocation.Loca
             locations.add(savedInstanceState.getParcelable(LOCATION2));
             locations.add(savedInstanceState.getParcelable(LOCATION3));
             totalPoints = savedInstanceState.getInt(TOTALSCORE);
+            currentRoundPoints = savedInstanceState.getInt(ROUNDSCORE);
+            currentRoundDistance = savedInstanceState.getDouble(ROUNDDISTANCE);
             if (savedInstanceState.getBoolean(GAMEOVER)) {
                 GameOver(true);
             } else {
+                if(savedInstanceState.getBoolean(ROUNDDIALOG)){
+                    onLocationDetermined(currentRoundPoints, currentRoundDistance);
+                }
                 // set the image
                 UpdateImage(locations.get(currentLocationIdx));
                 setRoundsAndPointsTextViews();
@@ -136,13 +153,19 @@ public class GameActivity extends AppCompatActivity implements UserLocation.Loca
                 }
             }
         }
-        UpdateImage(locations.get(currentLocationIdx));
+        if (currentLocationIdx < locations.size()) {
+            UpdateImage(locations.get(currentLocationIdx));
+        }
         setRoundsAndPointsTextViews();
     }
 
     void setRoundsAndPointsTextViews(){
-        currentPointsTextView.setText(getString(R.string.game_dlg_comment) + totalPoints);
-        currentRoundTextView.setText((currentLocationIdx + 1) + " / 3");
+        if(currentPointsTextView != null && currentRoundTextView != null) {
+            String currentPointsText = getString(R.string.game_dlg_comment) + totalPoints;
+            currentPointsTextView.setText(currentPointsText);
+            String currentRoundText = (currentLocationIdx + 1) + " / 3";
+            currentRoundTextView.setText(currentRoundText);
+        }
     }
 
     /**
@@ -162,6 +185,7 @@ public class GameActivity extends AppCompatActivity implements UserLocation.Loca
      * Checks location and pops up a dialog box to show points and asks to move to the next image.
      */
     public void checkLocation() {
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
         // Permission is already granted, perform the action
         // Show a dialog with "Calculating location..." while waiting for the location
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -182,8 +206,8 @@ public class GameActivity extends AppCompatActivity implements UserLocation.Loca
      * Must enable both approximate and precise location. If the user doesn't enable the location permissions
      * in the pop-up, they must enable it in their settings.
      * <p>
-     * Citations: Used https://developer.android.com/training/permissions/requesting#request-permission
-     * and https://developer.android.com/develop/sensors-and-location/location/permissions for the method.
+     * Citations: Used <a href="https://developer.android.com/training/permissions/requesting#request-permission">...</a>
+     * and <a href="https://developer.android.com/develop/sensors-and-location/location/permissions">...</a> for the method.
      *
      * @param view The view
      */
@@ -193,78 +217,26 @@ public class GameActivity extends AppCompatActivity implements UserLocation.Loca
                 && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             this.checkLocation();
         } else {
-            // Permission has not been granted yet, request it
-            locationPermissionRequest.launch(new String[]{
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-            });
+            finish();
+            Toast.makeText(this.getApplicationContext(), getString(R.string.location_permissions_text_game_activity), Toast.LENGTH_LONG).show();
         }
     }
 
-    /**
-     * Asks and checks if the user enabled precise and approximate location permissions.
-     * <p>
-     * Citations: Used https://developer.android.com/develop/sensors-and-location/location/permissions
-     * for the method.
-     */
-    ActivityResultLauncher<String[]> locationPermissionRequest =
-            registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
-                        Boolean fineLocationGranted = null;
-                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-                            fineLocationGranted = result.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false);
-                        }
-                        if (fineLocationGranted != null && fineLocationGranted) {
-                            this.checkLocation();
-                        } else {
-                            this.requestPermissionsFromSettings();
-                        }
-                    }
-            );
+    private class NextDestinationListener implements View.OnClickListener {
 
-    /**
-     * Dialog box explaining why location permissions are required for the application.
-     * <p>
-     * Citations: Used https://developer.android.com/training/permissions/requesting#request-permission
-     * and Bard for the method.
-     */
-    private void requestPermissionsFromSettings() {
-        // NOTE: Used Bard to help me with creating the dialog box (Mostly with the buttons). The
-        // first button is a link to the application's settings. The second button dismisses the dialog box.
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.location_permission_header);
-        builder.setMessage(R.string.location_permission_text);
-        // Creates a positive button for the dialog box
-        builder.setPositiveButton(R.string.location_permission_positive_button, (dialog, which) -> {
-            // Open app settings where user can grant permissions
-            Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-            Uri uri = Uri.fromParts("package", getPackageName(), null);
-            intent.setData(uri);
-            startActivity(intent);
-        });
-        // Negative button cancels the box
-        builder.setNegativeButton(R.string.location_permission_negative_button, (dialog, which) -> dialog.dismiss());
-        builder.show();
-    }
-
-    private class NextDestinationListener implements DialogInterface.OnClickListener {
-
-        /**
-         * When the dialog next is clicked a random new image will display.
-         *
-         * @param dialog the dialog that received the click
-         * @param which  the button that was clicked (ex.
-         *               {@link DialogInterface#BUTTON_POSITIVE}) or the position
-         *               of the item clicked
-         */
         @Override
-        public void onClick(DialogInterface dialog, int which) {
+        public void onClick(View v) {
+            // Implement your onClick behavior here
             currentLocationIdx++;
+            totalPoints += currentRoundPoints;
             if (currentLocationIdx >= locations.size()) {
                 GameOver(false);
             } else {
                 UpdateImage(locations.get(currentLocationIdx));
                 setRoundsAndPointsTextViews();
             }
+            customRoundDialog.dismiss();
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
         }
     }
 
@@ -276,7 +248,8 @@ public class GameActivity extends AppCompatActivity implements UserLocation.Loca
             appUser.getInstance().savePoints(totalPoints);
         }
         TextView gameOverScoreText = findViewById(R.id.gameOverScore);
-        gameOverScoreText.setText(getString(R.string.gameover_scoretext) + totalPoints);
+        String text = getString(R.string.gameover_scoretext) + totalPoints;
+        gameOverScoreText.setText(text);
         gameView.setVisibility(View.GONE);
         gameOverView.setVisibility(View.VISIBLE);
     }
@@ -289,6 +262,7 @@ public class GameActivity extends AppCompatActivity implements UserLocation.Loca
     public void onNewGame(View view) {
         Intent intent = new Intent(this, GameActivity.class);
         startActivity(intent);
+        finish();
     }
 
     /**
@@ -297,8 +271,7 @@ public class GameActivity extends AppCompatActivity implements UserLocation.Loca
      * @param view the view
      */
     public void onMainMenu(View view) {
-        Intent intent = new Intent(this, MenuActivity.class);
-        startActivity(intent);
+        finish();
     }
 
     /**
@@ -306,24 +279,45 @@ public class GameActivity extends AppCompatActivity implements UserLocation.Loca
      * location of the user is acquired
      */
     @Override
-    public void onLocationDetermined(int points) {
+    public void onLocationDetermined(int points, double distanceToLocation) {
+        currentRoundDistance = distanceToLocation;
+        currentRoundPoints = points;
+
         // Dismiss the "Calculating location..." dialog
-        calculatingLocationDialog.dismiss();
+        if(calculatingLocationDialog != null) {
+            calculatingLocationDialog.dismiss();
+        }
 
-        // Calculate the points from userLocation
-        totalPoints += points;
+        // Inflate the custom layout
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.game_round_dialog, null);
 
-        // Show a new dialog with the "Points..." message
-        NextDestinationListener listener = new NextDestinationListener();
+        // Find the views to set content
+        TextView locationName = dialogView.findViewById(R.id.gameDlgLocationName);
+        TextView totalScore = dialogView.findViewById(R.id.gameDlgTotalScore);
+        TextView distance = dialogView.findViewById(R.id.gameDlgDistance);
+        TextView roundScore = dialogView.findViewById(R.id.gameDlgRoundScore);
+        Button nextButton = dialogView.findViewById(R.id.nextButton);
+
+        locationName.setText(locations.get(currentLocationIdx).locationName);
+        String totalScoreText = "Total: " + (totalPoints + points);
+        totalScore.setText(totalScoreText);
+        roundScore.setText(String.valueOf(points));
+        String distanceText = "Distance: " + ((int) distanceToLocation) + "m";
+        distance.setText(distanceText);
+
+        // Create the dialog
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.game_dlg_title);
-        String message = locations.get(currentLocationIdx).locationName +
-                "\n" + getString(R.string.game_dlg_comment) + points +
-                "\n" + "Total: " + totalPoints;
-        builder.setMessage(message);
-        builder.setPositiveButton(R.string.next, listener);
-        AlertDialog pointsDialog = builder.create();
-        pointsDialog.show();
+        builder.setView(dialogView);
+        builder.setCancelable(false);
+
+        // Build and show the dialog
+        customRoundDialog = builder.create();
+
+        // Instantiate and set the listener to the button
+        NextDestinationListener nextDestinationListener = new NextDestinationListener();
+        nextButton.setOnClickListener(nextDestinationListener);
+
+        customRoundDialog.show();
     }
 
     @Override

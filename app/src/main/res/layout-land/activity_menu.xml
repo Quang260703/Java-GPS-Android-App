@@ -67,7 +67,7 @@
                 android:backgroundTint="@color/msu_light_green"
                 android:fontFamily="@font/baloo_bhai_2"
                 android:onClick="onLeaderboard"
-                android:text="@string/leaderboard_button"
+                android:text="@string/gamestats_button"
                 android:textSize="20sp" />
 
             <Button

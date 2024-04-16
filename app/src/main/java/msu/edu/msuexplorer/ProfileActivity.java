@@ -39,14 +39,13 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     /**
-     * Take user back to menu activity
+     * Takes user back to the login page
      * @param view The view
      */
-    public void onBack(View view) {
+    public void onMenu(View view) {
         Intent intent = new Intent(this, MenuActivity.class);
         startActivity(intent);
     }
-
     /**
      * Takes user back to the login page and log out
      * @param view The view
@@ -55,6 +54,24 @@ public class ProfileActivity extends AppCompatActivity {
         Intent intent = new Intent(this, LoginActivity.class);
         startActivity(intent);
         firebaseDB.LogOut();
+    }
+
+    /**
+     * When user clicks on Change Display Name, it'll take them to activity_change_display
+     * @param view The view
+     */
+    public void onChangeDisplay(View view) {
+        Intent intent = new Intent(this, ChangeDisplayActivity.class);
+        startActivity(intent);
+    }
+
+    /**
+     * When user clicks on Change Password, it'll take them to activity_change_password
+     * @param view The view
+     */
+    public void onChangePassword(View view) {
+        Intent intent = new Intent(this, ChangePasswordActivity.class);
+        startActivity(intent);
     }
 
     /**

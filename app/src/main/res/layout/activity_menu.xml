@@ -25,63 +25,69 @@
             android:textColor="@color/msu_light_green"
             android:textSize="34sp" />
 
-        <LinearLayout
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:padding="50dp">
+            android:layout_height="match_parent" >
 
-            <TextView
-                android:id="@+id/textView"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/baloo_bhaijaan"
-                android:gravity="center_horizontal"
-                android:text="@string/menu_title"
-                android:textColor="@color/msu_dark_green"
-                android:textSize="48sp" />
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="50dp">
 
-            <ImageView
-                android:id="@+id/imageView2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="20dp"
-                android:contentDescription="@string/app_name"
-                app:srcCompat="@drawable/msu"
-                tools:srcCompat="@drawable/msu" />
+                <TextView
+                    android:id="@+id/textView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/baloo_bhaijaan"
+                    android:gravity="center_horizontal"
+                    android:text="@string/menu_title"
+                    android:textColor="@color/msu_dark_green"
+                    android:textSize="48sp" />
 
-            <Button
-                android:id="@+id/start_game"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:backgroundTint="@color/msu_green"
-                android:fontFamily="@font/baloo_bhai_2_semibold"
-                android:onClick="onSubmit"
-                android:text="@string/start_game_text"
-                android:textSize="34sp" />
+                <ImageView
+                    android:id="@+id/imageView2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="20dp"
+                    android:contentDescription="@string/app_name"
+                    app:srcCompat="@drawable/msu"
+                    tools:srcCompat="@drawable/msu" />
 
-            <Button
-                android:id="@+id/leaderboard"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:backgroundTint="@color/msu_light_green"
-                android:fontFamily="@font/baloo_bhai_2"
-                android:onClick="onLeaderboard"
-                android:text="@string/leaderboard_button"
-                android:textSize="20sp" />
+                <Button
+                    android:id="@+id/start_game"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="@color/msu_green"
+                    android:fontFamily="@font/baloo_bhai_2_semibold"
+                    android:onClick="onSubmit"
+                    android:text="@string/start_game_text"
+                    android:textSize="34sp" />
 
-            <Button
-                android:id="@+id/button5"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:backgroundTint="@color/msu_light_green"
-                android:fontFamily="@font/baloo_bhai_2"
-                android:onClick="onProfile"
-                android:text="@string/profile_button"
-                android:textSize="20sp" />
+                <Button
+                    android:id="@+id/leaderboard"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="@color/msu_light_green"
+                    android:fontFamily="@font/baloo_bhai_2"
+                    android:onClick="onLeaderboard"
+                    android:text="@string/gamestats_title"
+                    android:textSize="20sp" />
 
-        </LinearLayout>
+                <Button
+                    android:id="@+id/button5"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="@color/msu_light_green"
+                    android:fontFamily="@font/baloo_bhai_2"
+                    android:onClick="onProfile"
+                    android:text="@string/profile_button"
+                    android:textSize="20sp" />
+
+            </LinearLayout>
+        </ScrollView>
+
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

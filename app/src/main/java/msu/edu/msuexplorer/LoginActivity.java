@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -28,10 +27,28 @@ public class LoginActivity extends AppCompatActivity implements View.OnTouchList
     private EditText password;
     private EditText username;
 
+    private boolean isLoginPage = true;
+    private String IS_LOGIN_PAGE = "login.isLogin";
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle bundle) {
+        super.onSaveInstanceState(bundle);
+        bundle.putBoolean(IS_LOGIN_PAGE, isLoginPage);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+
+        if(savedInstanceState != null) {
+            isLoginPage = savedInstanceState.getBoolean(IS_LOGIN_PAGE);
+        }
+
+        if (isLoginPage) {
+            setContentView(R.layout.activity_login);
+        } else {
+            setContentView(R.layout.activity_register);
+        }
 
         auth = FirebaseAuth.getInstance();
 
@@ -40,23 +57,18 @@ public class LoginActivity extends AppCompatActivity implements View.OnTouchList
 
     @Override
     public boolean onTouch(View v, MotionEvent m) {
-        InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
         return true;
-    }
-
-    public void onBack(View view) {
-        Intent intent = new Intent(this, MainActivity.class);
-        startActivity(intent);
     }
 
     public void onChangeToLogin(View view) {
         setContentView(R.layout.activity_login);
+        isLoginPage = true;
         findViewById(R.id.layout).setOnTouchListener(this);
     }
 
     public void onRegister(View view) {
         setContentView(R.layout.activity_register);
+        isLoginPage = false;
         findViewById(R.id.layout).setOnTouchListener(this);
     }
 
@@ -64,6 +76,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnTouchList
         email = findViewById(R.id.editTextEmail);
         password = findViewById(R.id.editTextPassword);
         Button button = (Button) findViewById(R.id.buttonLogin);
+        Intent intent = new Intent(this, MenuActivity.class);
         if (email.length() == 0 || password.length() == 0) {
             if (email.length() == 0) {
                 email.setError("Email cannot be empty");
@@ -82,6 +95,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnTouchList
                                 Log.d(TAG, "signInWithEmail:success");
                                 FirebaseUser user = auth.getCurrentUser();
                                 appUser.getInstance().saveUser(user);
+                                view.invalidate();
+                                startActivity(intent);
                                 finish();
                             } else {
                                 // If sign in fails, display a message to the user.
@@ -99,6 +114,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnTouchList
         username = findViewById(R.id.editTextUsername);
         password = findViewById(R.id.editTextPassword);
         Button button = (Button) findViewById(R.id.buttonSignUp);
+        Intent intent = new Intent(this, MenuActivity.class);
         if (email.length() == 0 || password.length() < 6 || username.length() == 0) {
             if (email.length() == 0) {
                 email.setError("Email cannot be empty");
@@ -122,6 +138,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnTouchList
                                 appUser db = appUser.getInstance();
                                 db.setUsername(username.getText().toString());
                                 db.saveUser(user);
+                                view.invalidate();
+                                startActivity(intent);
                                 finish();
                             } else {
                                 // If sign in fails, display a message to the user.

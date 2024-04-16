@@ -68,8 +68,7 @@
             android:layout_height="0dp"
             android:layout_gravity="center_horizontal"
             android:layout_weight="4"
-            android:contentDescription="@string/game_image_desc"
-            app:srcCompat="@drawable/broad" />
+            android:contentDescription="@string/game_image_desc" />
 
         <FrameLayout
             android:layout_width="match_parent"
@@ -104,7 +103,9 @@
             android:layout_weight="1"
             android:gravity="center"
             android:text="@string/gameover_title"
-            android:textSize="48sp" />
+            android:textSize="48sp"
+            android:fontFamily="@font/baloo_bhai_2_semibold"
+            android:textColor="@color/msu_dark_green" />
 
         <TextView
             android:id="@+id/gameOverScore"
@@ -112,7 +113,10 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             android:gravity="center"
-            android:text="@string/gameover_scoretext" />
+            android:text="@string/gameover_scoretext"
+            android:fontFamily="@font/baloo_bhai_2_semibold"
+            android:textColor="@color/msu_dark_green"
+            android:textSize="24sp"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -127,7 +131,9 @@
                 android:layout_height="wrap_content"
                 android:onClick="onMainMenu"
                 android:text="@string/gameover_mainmenu_button"
-                tools:ignore="UsingOnClickInXml" />
+                tools:ignore="UsingOnClickInXml"
+                android:backgroundTint="@color/msu_green"
+                android:fontFamily="@font/baloo_bhaijaan"/>
 
             <Button
                 android:id="@+id/gameOverNewGame"
@@ -135,7 +141,9 @@
                 android:layout_height="wrap_content"
                 android:onClick="onNewGame"
                 android:text="@string/gameover_newgame"
-                tools:ignore="UsingOnClickInXml" />
+                tools:ignore="UsingOnClickInXml"
+                android:backgroundTint="@color/msu_green"
+                android:fontFamily="@font/baloo_bhaijaan"/>
 
         </LinearLayout>
 

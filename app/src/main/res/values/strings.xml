@@ -1,16 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">MSU Explorer</string>
-    <string name="login_button">Log In</string>
-    <string name="create_user_button">Sign Up</string>
+    <string name="login_button">Login Existing Account</string>
+    <string name="create_user_button">Create An Account</string>
     <string name="sign_up_button">Login or Sign Up</string>
-
     <string name="game_arrived_button">I\'ve arrived</string>
     <string name="game_image_desc">Image of the location you must seek out</string>
     <string name="game_heading">Can you find this?</string>
-
     <string name="submit_button">Submit</string>
     <string name="location_permission_header">Precise Location Permission Needed</string>
     <string name="location_permission_text">MSU Explorer requires access to location to function property. Please enable the precise location permission in the application settings.</string>
+    <string name="location_permissions_text_game_activity">Round cancelled. Precise location is required to play.</string>
     <string name="location_permission_positive_button">Settings</string>
     <string name="location_permission_negative_button">Cancel</string>
     <string name="game_dlg_title">How did you do?</string>
@@ -22,7 +22,7 @@
     <string name="gameover_newgame">New Game</string>
     <string name="start_game_text">Start Game</string>
     <string name="profile_button">Profile Settings</string>
-    <string name="leaderboard_button">Leaderboard</string>
+    <string name="gamestats_button">Game Statistics</string>
     <string name="loginback_button">Back to Login</string>
     <string name="back_button">Back</string>
     <string name="login_prompt">Please login using your information</string>
@@ -34,13 +34,12 @@
     <string name="register_prompt">Please register using your information</string>
     <string name="login_button_prompt">Already have an account? Log In</string>
     <string name="menu_button">Main Menu</string>
-    <string name="leaderboard_title">Leaderboard</string>
+    <string name="gamestats_title">Game Statistics</string>
     <string name="rank_text">Rank</string>
     <string name="username_text">Username</string>
     <string name="score_text">Score</string>
     <string name="game_calculating_dlg">Calculating Location …</string>
     <string name="menu_title">MSU Explorer</string>
-    <string name="arrow">←</string>
     <string name="profile_title">Profile</string>
     <string name="change_display">Change Display Name</string>
     <string name="change_pass">Change Password</string>
@@ -51,5 +50,28 @@
     <string name="sign_out">Sign Out</string>
     <string name="email_address">Email Address</string>
     <string name="email_hint">Enter your email address</string>
+    <string name="input_new_pass">Please input a new password</string>
+    <string name="new_password">New Password</string>
+    <string name="reenter_password">Re-Enter Password</string>
+    <string name="new_pass_hint">Enter new password</string>
+    <string name="second_new_pass_hint">Re-enter new password</string>
+    <string name="display_name_info">Please input a new display name</string>
+    <string name="display_name_hint">Enter existing username</string>
+    <string name="new_display_name_hint">Enter new username</string>
+    <string name="current_username">Existing Username</string>
+    <string name="new_username_label">New Username</string>
+    <string name="invalid_input">Invalid Input</string>
+    <string name="input_non_empty">Input a non empty value.</string>
+    <string name="match_username_error">Current username value doesn\'t match.</string>
+    <string name="usernames_cant_match_error">The old and current usernames can\'t match.</string>
+    <string name="success_title">Successful Change!</string>
+    <string name="success_change_info"> Successfully changed your username.</string>
+    <string name="password_nonempty_error">Enter a non-empty password value.</string>
+    <string name="no_match_error">Passwords don\'t match. Please try again.</string>
+    <string name="password_success">Password was changed successfully. Signing out...</string>
+    <string name="password_invalid_error">The password must be 6 characters or more. Please try again.</string>
+    <string name="no_score">0</string>
+    <string name="total_score_title">Your Total Score</string>
+    <string name="previous_game_title">Previous Games</string>
 
 </resources>

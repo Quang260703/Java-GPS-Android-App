@@ -1,31 +1,56 @@
 package msu.edu.msuexplorer;
 
+import static android.content.ContentValues.TAG;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.UiThread;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class LeaderboardActivity extends AppCompatActivity {
-
+    ArrayList<String> usernameList;
+    appUser appUserInstance;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_leaderboard);
+        appUserInstance = appUser.getInstance();
 
-        int rank = 1;
-        ArrayList<Integer> scores = appUser.getInstance().getPoints();
+        // Get the data to display
+        ArrayList<Integer> points = appUserInstance.getPoints();
 
-        for (int score : scores) {
-            AddRow(rank, "user1", score);
-            rank++;
+        // Update the total score for a user
+        UpdateTotalScore(points);
+
+        // Add previous game log to activity-leaderboard
+        if (points.size() != 0) {
+            for (int i = (points.size() - 1); i >= 0; i--) {
+                AddRow(i + 1, points.get(i));
+            }
         }
     }
 
@@ -39,67 +64,43 @@ public class LeaderboardActivity extends AppCompatActivity {
     }
 
     /**
+     *
+     */
+    public void UpdateTotalScore(ArrayList<Integer> points) {
+        int sum = 0;
+
+        for (int i = 0; i < points.size(); i++) {
+            sum += points.get(i);
+        }
+
+        TextView scoreView = (TextView) findViewById(R.id.score);
+        String sumString = Integer.toString(sum);
+        scoreView.setText(sumString);
+    }
+
+    /**
      * Add a new row to the Leaderboard. Used to add and update user
      * scores based on highest accumulated score.
-     * @param rank The rank of the user
+     * @param gameNum The number associated with the game
+     * @param score The score earned from that game
      */
-    private void AddRow(int rank, String username, int score) {
+    private void AddRow(int gameNum, int score) {
         // Get the Leaderboard Table by the id
-        TableLayout leaderboardTable = findViewById(R.id.leaderboard_table);
+        LinearLayout leaderboardTable = findViewById(R.id.previous_game_layout);
 
-        // Make a new row on the leaderboard
-        TableRow userRow = new TableRow(this);
-        userRow.setLayoutParams(new TableRow.LayoutParams(
-                TableRow.LayoutParams.MATCH_PARENT,
-                TableRow.LayoutParams.MATCH_PARENT));
-        userRow.setPadding(10, 10, 10, 10);
-
-        // Add a new layout param for rankLabel
-        TableRow.LayoutParams rankParams = new TableRow.LayoutParams(
-                TableRow.LayoutParams.WRAP_CONTENT,
-                TableRow.LayoutParams.WRAP_CONTENT, 0.1f
-        );
-        rankParams.setMargins(10, 10, 10, 10);
-
-        // Add the rank to the row
-        TextView rankLabel = new TextView(this);
-        String rankString = rank + ".";
-        rankLabel.setText(rankString);
-        rankLabel.setTextSize(20);
-        rankLabel.setLayoutParams(rankParams);
-
-        // Add layout params for usernameLabel
-        TableRow.LayoutParams usernameParams = new TableRow.LayoutParams(
-                TableRow.LayoutParams.WRAP_CONTENT,
-                TableRow.LayoutParams.WRAP_CONTENT, 1f
-        );
-        usernameParams.setMargins(10, 10, 10, 10);
-
-        // Add the username to the row
-        TextView usernameLabel = new TextView(this);
-        usernameLabel.setText(username);
-        usernameLabel.setTextSize(20);
-        usernameLabel.setGravity(Gravity.LEFT);
-        usernameLabel.setLayoutParams(usernameParams);
-
-        // Add a layout params for scoreLabel
-        TableRow.LayoutParams scoreParams = new TableRow.LayoutParams(
+        // Add a new layout param for gameNumLabel
+        TableRow.LayoutParams gameParams = new TableRow.LayoutParams(
                 TableRow.LayoutParams.WRAP_CONTENT,
                 TableRow.LayoutParams.WRAP_CONTENT
         );
-        scoreParams.setMargins(10, 10, 10, 10);
+        gameParams.setMargins(10, 10, 10, 10);
 
-        // Add the score to the row
-        String scoreText = Integer.toString(score);
-        TextView scoreLabel = new TextView(this);
-        scoreLabel.setText(scoreText);
-        scoreLabel.setTextSize(20);
-        scoreLabel.setLayoutParams(scoreParams);
+        String previousGameString = "Game " + Integer.toString(gameNum) + ": " + Integer.toString(score);
+        TextView gameLabel = new TextView(this);
+        gameLabel.setText(previousGameString);
+        gameLabel.setTextSize(20);
+        gameLabel.setLayoutParams(gameParams);
 
-        userRow.addView(rankLabel);
-        userRow.addView(usernameLabel);
-        userRow.addView(scoreLabel);
-
-        leaderboardTable.addView(userRow);
+        leaderboardTable.addView(gameLabel);
     }
 }

@@ -2,13 +2,23 @@ package msu.edu.msuexplorer;
 
 import static android.content.ContentValues.TAG;
 
+import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.util.Log;
+import android.util.Pair;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -40,6 +50,9 @@ public class appUser {
     // the points the user has
     private ArrayList<Integer> points;
 
+    // List of pairs containing username and total points
+    private ArrayList<Pair<String, Integer>> userScoreList;
+
     // Private constructor to prevent instantiation from outside the class
     private appUser() {
         db = FirebaseFirestore.getInstance();
@@ -64,13 +77,16 @@ public class appUser {
         if (user != null) {
             uid = user.getUid();
             email = user.getEmail();
-            db.collection("users").document(uid).get().addOnCompleteListener(task -> {
+
+            DocumentReference doc = db.collection("users").document(uid);
+
+            doc.get().addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
                     DocumentSnapshot document = task.getResult();
                     //handles if the user hasn't been added to the users table
                     if (document.getData() == null) {
-                        DocumentReference doc = db.collection("users").document(uid);
                         points = new ArrayList<>();
+                        Pair<String, Integer> userAndTotalPoints = new Pair<String, Integer>("A pair", 55);
                         points.add(0);
                         doc.set(toJson());
                     }
@@ -161,6 +177,37 @@ public class appUser {
     }
 
     /**
+     * Save a new username into the db,
+     * used when the user changes their username
+     * @param username The new username to save
+     */
+    public void changeUsername(String username) {
+        DocumentReference uidRef = db.collection("users").document(getUid());
+        this.username = username;
+
+        // Set username field to the new username based on uid
+        uidRef.update("username", this.username)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "DocumentSnapshot successfully updated!");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "Error updating document", e);
+                    }
+                });
+    }
+
+    public void changePassword(FirebaseUser user, String newPassword) {
+        user.updatePassword(newPassword);
+        LogOut();
+    }
+
+
+    /**
      * Gets the users points
      * @return an array list of the users points
      */
@@ -184,7 +231,9 @@ public class appUser {
      * Set the users username
      * @param username the username to set
      */
-    public void setUsername(String username) { this.username = username; }
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
     public String getUsername() { return username; }
 
